@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Review Intelligence & Sentiment Analysis</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="page">
+  <header class="hero">
+    <div>
+      <h1><span class="brain">🧠</span> AI Review Intelligence &amp; Sentiment Analysis</h1>
+      <p>Multi-domain NLP • TF-IDF • Ensemble Learning • Aspect Intelligence</p>
+    </div>
+    <span class="deploy">Deploy</span>
+  </header>
+
+  <nav class="tabs" aria-label="Main navigation">
+    <button class="tab active" data-tab="overview">📊 Overview</button>
+    <button class="tab" data-tab="analyze">🔎 Analyze Review</button>
+    <button class="tab" data-tab="batch">📦 Batch Analysis</button>
+    <button class="tab" data-tab="aspect">🎯 Aspect Intelligence</button>
+    <button class="tab" data-tab="evaluation">◉ Model Evaluation</button>
+    <button class="tab" data-tab="dataset">🛠 Dataset &amp; Retrain</button>
+  </nav>
+
+  <main>
+    <section id="overview" class="tab-panel active">
+      <div class="stat-grid">
+        <div class="stat"><span>Total Reviews</span><strong>{{ total }}</strong></div>
+        <div class="stat"><span>Positive</span><strong>{{ counts.get('positive', 0) }}</strong></div>
+        <div class="stat"><span>Negative</span><strong>{{ counts.get('negative', 0) }}</strong></div>
+        <div class="stat"><span>Neutral</span><strong>{{ counts.get('neutral', 0) }}</strong></div>
+      </div>
+      <div class="chart-grid">
+        <div class="card"><h2>Sentiment Distribution</h2><div class="bar-chart">
+          {% for label in ['positive','neutral','negative'] %}<div class="bar-col"><div class="bar-value">{{ counts.get(label,0) }}</div><div class="bar" style="height: {{ (counts.get(label,0) / total * 260) if total else 0 }}px"></div><div class="bar-label">{{ label|capitalize }}</div></div>{% endfor %}
+        </div></div>
+        <div class="card"><h2>Domain Distribution</h2><div class="bar-chart">
+          {% for label in ['Movie','Product','Restaurant'] %}<div class="bar-col"><div class="bar-value">{{ domains.get(label,0) }}</div><div class="bar" style="height: {{ (domains.get(label,0) / total * 260) if total else 0 }}px"></div><div class="bar-label">{{ label }}</div></div>{% endfor %}
+        </div></div>
+      </div>
+      <div class="info-card"><h2>Project Pipeline</h2><div class="pipeline"><span>Review</span><b>→</b><span>Preprocessing</span><b>→</b><span>TF-IDF</span><b>→</b><span>4 ML Models</span><b>→</b><span>Soft Voting</span><b>→</b><span>Sentiment</span></div></div>
+    </section>
+
+    <section id="analyze" class="tab-panel">
+      <div class="section-head"><h2>Analyze a New Review</h2><p>Enter a review and let the ensemble compare four models.</p></div>
+      <label>Domain</label>
+      <select id="domain"><option>Auto-detect</option><option>Product</option><option>Movie</option><option>Restaurant</option></select>
+      <label>Enter a review</label>
+      <textarea id="review" placeholder="From my experience, the meal arrived on time so the experience was average."></textarea>
+      <button class="primary" onclick="analyzeReview()">Analyze with Ensemble</button>
+      <div id="analyzeMessage"></div><div id="analysisResult"></div>
+    </section>
+
+    <section id="batch" class="tab-panel">
+      <div class="section-head"><h2>Batch Analysis</h2><p>Upload CSV with a <b>review</b> column.</p></div>
+      <div class="upload-box"><input id="batchFile" type="file" accept=".csv"><button class="primary small" onclick="runBatch()">Analyze CSV</button></div>
+      <div id="batchMessage"></div><div id="batchPreview"></div>
+    </section>
+
+    <section id="aspect" class="tab-panel">
+      <div class="section-head"><h2>Aspect Intelligence</h2><p>Identify the domain and sentiment of important review aspects.</p></div>
+      <label>Domain</label><select id="aspectDomain"><option>Auto-detect</option><option>Product</option><option>Movie</option><option>Restaurant</option></select>
+      <label>Enter a review</label><textarea id="aspectReview" placeholder="The camera is excellent but the battery drains quickly."></textarea>
+      <button class="primary" onclick="analyzeAspect()">Analyze Aspects</button>
+      <div id="aspectResult"></div>
+    </section>
+
+    <section id="evaluation" class="tab-panel">
+      <div class="section-head"><h2>Model Evaluation</h2><p>Performance on the held-out test set used during training.</p></div>
+      <div id="metricsTable"></div>
+      <div id="confusion"></div>
+    </section>
+
+    <section id="dataset" class="tab-panel">
+      <div class="section-head"><h2>Dataset &amp; Retrain</h2><p>Training CSV requires <b>review</b> + <b>sentiment</b>. Category is recommended.</p></div>
+      <p class="dataset-count">Current dataset: <b>{{ total }}</b> reviews</p>
+      <div class="table-wrap"><table><thead><tr><th>review_id</th><th>category</th><th>review</th><th>sentiment</th></tr></thead><tbody>
+      {% for r in rows %}<tr><td>{{ r.get('review_id','') }}</td><td>{{ r.get('category','') }}</td><td>{{ r.get('review','') }}</td><td>{{ r.get('sentiment','') }}</td></tr>{% endfor %}
+      </tbody></table></div>
+      <div class="retrain-box"><label>Upload labeled training CSV</label><div class="upload-line"><input id="trainFile" type="file" accept=".csv"><button class="primary small" onclick="uploadTraining()">Upload &amp; Retrain</button><button class="secondary small" onclick="retrainModel()">Retrain Current Dataset</button></div><div id="trainMessage"></div></div>
+    </section>
+  </main>
+</div>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
